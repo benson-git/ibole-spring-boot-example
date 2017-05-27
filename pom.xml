@@ -31,7 +31,11 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>${org.springframework.boot.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<version>${org.springframework.boot.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -56,6 +60,12 @@
 				<version>${junit_version}</version>
 				<scope>test</scope>
 			</dependency>
+			<!--  running mongodb in unittests -->
+		<dependency>
+		    <groupId>de.flapdoodle.embed</groupId>
+		    <artifactId>de.flapdoodle.embed.mongo</artifactId>
+		    <version>2.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<!-- Package as an executable jar -->

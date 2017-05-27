@@ -3,7 +3,11 @@ package io.ibole.springboot.sample.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
+import io.ibole.springboot.example.domain.Colleague;
+import io.ibole.springboot.example.domain.Recognition;
+import io.ibole.springboot.example.domain.User;
+import io.ibole.springboot.example.domain.repository.ColleagueRepository;
+import io.ibole.springboot.example.domain.repository.UserRepository;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,8 +24,11 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import io.ibole.springboot.example.domain.User;
-import io.ibole.springboot.example.domain.repository.UserRepository;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 //@SpringBootApplication
@@ -32,6 +39,9 @@ public class ApplicationTests {
 	@Autowired
 	private UserRepository userRepo;
 	
+	@Autowired
+    private ColleagueRepository colleagueRepo;
+	
 	final String[] names = new String[] { "张三", "李四" };
 
 	protected final String password = "123456";
@@ -39,10 +49,13 @@ public class ApplicationTests {
 	protected Pageable pageable = new PageRequest(0, 10);
 
 	protected static Logger logger = LoggerFactory.getLogger(ApplicationTests.class);
+	
+	//private MongodExecutable mongodExecutable = null;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws UnknownHostException, IOException {
 		//SpringApplication.run(ApplicationTests.class);
+	  //startMongoDb();
 	}
 
 	/**
@@ -61,11 +74,20 @@ public class ApplicationTests {
 			userRepo.save(u);
 			logger.info("插入用户：{}", u.toString());
 		}
+		
+		
+		List<Recognition> recognitions = new ArrayList<Recognition>();
+		recognitions.add(new Recognition("quote123"));
+		Colleague colleague = new Colleague("name123", recognitions);
+		colleagueRepo.save(colleague);
 	}
 	
 	@Test
     public void select(){
         List<User> users=userRepo.findAll();
+        Colleague colleague = (Colleague) colleagueRepo.findByName("name123");
+        assertThat(colleague.recognitions.get(0).quote, is("quote123"));
+        
         assertThat(users.size(), is(2));
 
         assertThat(users.get(0).getPassword(), is(password));
@@ -87,5 +109,32 @@ public class ApplicationTests {
     public void clear(){
         logger.info("清空全部的测试数据......");
         userRepo.deleteAll();
+        colleagueRepo.deleteAll();
+        //stopMongoDb();
     }
+    
+//  private void startMongoDb() throws UnknownHostException, IOException {
+//    MongodStarter starter = MongodStarter.getDefaultInstance();
+//
+//    String bindIp = "localhost";
+//    int port = 27017;
+//    IMongodConfig mongodConfig =
+//        new MongodConfigBuilder().version(Version.Main.PRODUCTION)
+//            .net(new Net(bindIp, port, Network.localhostIsIPv6())).build();
+//
+//    mongodExecutable = starter.prepare(mongodConfig);
+//    MongodProcess mongod = mongodExecutable.start();
+//
+//    // MongoClient mongo = new MongoClient(bindIp, port);
+//    // DB db = mongo.getDB("test");
+//    // DBCollection col = db.createCollection("testCol", new BasicDBObject());
+//    // col.save(new BasicDBObject("testDoc", new Date()));
+//
+//  }
+//
+//  private void stopMongoDb() {
+//    if (mongodExecutable != null) {
+//      mongodExecutable.stop();
+//    }
+//  }
 }
